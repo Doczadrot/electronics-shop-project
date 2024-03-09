@@ -13,7 +13,17 @@ class Item:
         :param price: Цена за единицу товара.
         :param quantity: Количество товара в магазине.
         """
-        pass
+        # Проверка входных данных
+        assert price >= 0, f"Цена {price} должна быть больше или равна 0"
+        assert quantity >= 0, f"Количество {quantity} должно быть больше или равно 0"
+
+        # Присвоение атрибутов
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+
+        # Добавление экземпляра в список всех экземпляров
+        Item.all.append(self)
 
     def calculate_total_price(self) -> float:
         """
@@ -21,10 +31,13 @@ class Item:
 
         :return: Общая стоимость товара.
         """
-        pass
+        return self.price * self.quantity
 
     def apply_discount(self) -> None:
         """
         Применяет установленную скидку для конкретного товара.
         """
-        pass
+        self.price *= self.pay_rate
+
+    def __repr__(self) -> str:
+        return f"Item('{self.name}', {self.price}, {self.quantity})"
