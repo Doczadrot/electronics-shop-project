@@ -1,22 +1,22 @@
-from src.item import Item
+import os
+from src.channel import Channel
 
 if __name__ == '__main__':
-    item = Item('Телефон', 10000, 5)
+    # Установите API ключ в переменные среды
+    os.environ['YOUTUBE_API_KEY'] = 'AIzaSyDwuxvkIC_OTUYnAiBOAsgUDtAEBb6iuug'
 
-    # длина наименования товара меньше 10 символов
-    item.name = 'Смартфон'
-    assert item.name == 'Смартфон'
+    # ID канала, информацию о котором вы хотите получить
+    channel_id = 'UC-lHJZR3Gqxm24_Vd_AJ5Yw'  # Замените на ваш канал
 
-    # длина наименования товара больше 10 символов
-    item.name = 'СуперСмартфон'
-    # Exception: Длина наименования товара превышает 10 символов.
+    # Создайте объект Channel и получите информацию о канале
+    channel = Channel(channel_id)
 
-    Item.instantiate_from_csv('src/items.csv')  # создание объектов из данных файла
-    assert len(Item.all) == 5  # в файле 5 записей с данными по товарам
+    # Выведите информацию о канале в консоль
+    print(f"Название канала: {channel.title}")
+    print(f"Описание канала: {channel.description}")
+    print(f"Количество подписчиков: {channel.subscriber_count}")
+    print(f"Количество видео: {channel.video_count}")
+    print(f"Общее количество просмотров: {channel.view_count}")
 
-    item1 = Item.all[0]
-    assert item1.name == 'Смартфон'
-
-    assert Item.string_to_number('5') == 5
-    assert Item.string_to_number('5.0') == 5
-    assert Item.string_to_number('5.5') == 5
+    # Сохраните информацию о канале в JSON файл
+    channel.to_json('channel_info.json')
