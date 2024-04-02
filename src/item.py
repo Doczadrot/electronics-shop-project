@@ -18,12 +18,29 @@ class Item:
         assert quantity >= 0, f"Количество {quantity} должно быть больше или равно 0"
 
         # Присвоение атрибутов
-        self.name = name
+        self._name = name
         self.price = price
         self.quantity = quantity
 
         # Добавление экземпляра в список всех экземпляров
         Item.all.append(self)
+
+    @property
+    def name(self) -> str:
+        """
+        Геттер для атрибута name.
+        """
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        """
+        Сеттер для атрибута name. Проверяет длину наименования товара и обрезает строку, если она больше 10 символов.
+        """
+        if len(value) > 10:
+            self._name = value[:10]
+        else:
+            self._name = value
 
     def calculate_total_price(self) -> float:
         """
@@ -41,3 +58,4 @@ class Item:
 
     def __repr__(self) -> str:
         return f"Item('{self.name}', {self.price}, {self.quantity})"
+
