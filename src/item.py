@@ -1,60 +1,51 @@
+import os
+import csv
+
 class Item:
-    """
-    Класс для представления товара в магазине.
-    """
     pay_rate = 1.0
     all = []
 
-    def __init__(self, name: str, price: float, quantity: int) -> None:
-        """
-        Создание экземпляра класса item.
+    def __init__(self, name: str, price: str, quantity: str):
+        assert float(price) >= 0, f"Цена {price} должна быть больше или равна 0"
+        assert int(quantity) >= 0, f"Количество {quantity} должно быть больше или равно 0"
 
-        :param name: Название товара.
-        :param price: Цена за единицу товара.
-        :param quantity: Количество товара в магазине.
-        """
-        # Проверка входных данных
-        assert price >= 0, f"Цена {price} должна быть больше или равна 0"
-        assert quantity >= 0, f"Количество {quantity} должно быть больше или равно 0"
-
-        # Присвоение атрибутов
-        self._name = name
-        self.price = price
-        self.quantity = quantity
-
-        # Добавление экземпляра в список всех экземпляров
+        self._full_name = name
+        self.price = float(price)
+        self.quantity = int(quantity)
         Item.all.append(self)
 
     @property
-    def name(self) -> str:
-        """
-        Геттер для атрибута name.
-        """
-        return self._name
+    def name(self):
+        if len(self._full_name) > 10:
+            return self._full_name[:10]
+        else:
+            return self._full_name
 
     @name.setter
-    def name(self, value: str) -> None:
-        """
-        Сеттер для атрибута name. Проверяет длину наименования товара и обрезает строку, если она больше 10 символов.
-        """
-        if len(value) > 10:
-            self._name = value[:10]
-        else:
-            self._name = value
+    def name(self, value):
+        self._full_name = value
+        Item.all.remove(self)
+        Item.all.append(self)
 
-    def calculate_total_price(self) -> float:
-        """
-        Рассчитывает общую стоимость конкретного товара в магазине.
-
-        :return: Общая стоимость товара.
-        """
+    def calculate_total_price(self):
         return self.price * self.quantity
 
-    def apply_discount(self) -> None:
-        """
-        Применяет установленную скидку для конкретного товара.
-        """
+    def apply_discount(self):
         self.price *= self.pay_rate
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"Item('{self.name}', {self.price}, {self.quantity})"
+
+    @classmethod
+    def instantiate_from_csv(cls, csv_file_path):
+        with open(csv_file_path, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            items = [cls(**dict_row) for dict_row in reader]
+        return items
+
+    @staticmethod
+    def string_to_number(string):
+        try:
+            return float(string)
+        except ValueError:
+            return 0.0
