@@ -34,13 +34,16 @@ class Item:
         self.price *= self.pay_rate
 
     def __repr__(self):
-        return f"Item('{self.name}', {self.price}, {self.quantity})"
+        return f"Item('{self._full_name}', {self.price:.1f}, {self.quantity})"
+
+    def __str__(self):
+        return self.name
 
     @classmethod
     def instantiate_from_csv(cls, csv_file_path):
         with open(csv_file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
-            items = [cls(**dict_row) for dict_row in reader]
+            items = [cls(row['name'], float(row['price']), int(row['quantity'])) for row in reader]
         return items
 
     @staticmethod

@@ -15,6 +15,12 @@ def clear_item_all():
     Item.all.clear()
 
 
+@pytest.fixture
+def item():
+    # Создаем экземпляр класса Item для использования в тестах
+    return Item("Test Item", 10.0, 5)
+
+
 def test_instantiate_from_csv():
     # Создаем временный файл items.csv с данными для теста
     with open(test_items_file, 'w', encoding='utf-8') as file:
@@ -62,3 +68,11 @@ def test_name_getter_setter():
 
     item.name = "Short"
     assert item.name == "Short"  # Ожидается исходное короткое имя без обрезки
+
+
+def test_repr(item):
+    assert repr(item) == "Item('Test Item', 10.0, 5)"
+
+
+def test_str(item):
+    assert str(item) == "Test Item"
