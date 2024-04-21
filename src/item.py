@@ -5,13 +5,13 @@ class Item:
     pay_rate = 1.0
     all = []
 
-    def __init__(self, name: str, price: str, quantity: str):
-        assert float(price) >= 0, f"Цена {price} должна быть больше или равна 0"
-        assert int(quantity) >= 0, f"Количество {quantity} должно быть больше или равно 0"
+    def __init__(self, name: str, price: float, quantity: int):
+        assert price >= 0, f"Цена {price} должна быть больше или равна 0"
+        assert quantity >= 0, f"Количество {quantity} должно быть больше или равно 0"
 
         self._full_name = name
-        self.price = float(price)
-        self.quantity = int(quantity)
+        self.price = price
+        self.quantity = quantity
         Item.all.append(self)
 
     @property
@@ -52,3 +52,17 @@ class Item:
             return float(string)
         except ValueError:
             return 0.0
+
+    def save_all_to_csv(self, csv_file_path):
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as file:
+            fieldnames = ['name', 'price', 'quantity']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            for item in Item.all:
+                writer.writerow({'name': item.name, 'price': item.price, 'quantity': item.quantity})
+
+    def __add__(self, other):
+        if isinstance(other, Item):
+            return self.quantity + other.quantity
+        else:
+            raise TypeError("Можно складывать только экземпляры класса Item")
