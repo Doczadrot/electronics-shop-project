@@ -1,5 +1,19 @@
 import os
 import csv
+from src.language_mixin import LanguageMixin
+
+
+
+class LanguageMixin:
+    _keyboard_language = 'EN'
+    SUPPORTED_LANGUAGES = ('EN', 'RU')
+
+    @property
+    def language(self):
+        return self._keyboard_language
+
+    def change_lang(self):
+        self._keyboard_language = 'RU' if self._keyboard_language == 'EN' else 'EN'
 
 class Item:
     pay_rate = 1.0
@@ -37,7 +51,7 @@ class Item:
         return f"Item('{self._full_name}', {self.price:.1f}, {self.quantity})"
 
     def __str__(self):
-        return self.name
+        return self._full_name
 
     @classmethod
     def instantiate_from_csv(cls, csv_file_path):
@@ -47,11 +61,8 @@ class Item:
         return items
 
     @staticmethod
-    def string_to_number(string):
-        try:
-            return float(string)
-        except ValueError:
-            return 0.0
+    def get_class_string():
+        return "Item"
 
     def save_all_to_csv(self, csv_file_path):
         with open(csv_file_path, 'w', newline='', encoding='utf-8') as file:
@@ -66,3 +77,8 @@ class Item:
             return self.quantity + other.quantity
         else:
             raise TypeError("Можно складывать только экземпляры класса Item")
+
+class Keyboard(Item, LanguageMixin):
+    def __init__(self, name, price, quantity):
+        super().__init__(name, price, quantity)
+
