@@ -1,19 +1,9 @@
 import os
-import csv
 from src.language_mixin import LanguageMixin
 
-
-
-class LanguageMixin:
-    _keyboard_language = 'EN'
-    SUPPORTED_LANGUAGES = ('EN', 'RU')
-
-    @property
-    def language(self):
-        return self._keyboard_language
-
-    def change_lang(self):
-        self._keyboard_language = 'RU' if self._keyboard_language == 'EN' else 'EN'
+class InstantiateCSVError(Exception):
+    """Исключение, возникающее при повреждении файла CSV."""
+    pass
 
 class Item:
     pay_rate = 1.0
@@ -28,57 +18,32 @@ class Item:
         self.quantity = quantity
         Item.all.append(self)
 
-    @property
-    def name(self):
-        if len(self._full_name) > 10:
-            return self._full_name[:10]
-        else:
-            return self._full_name
+    def display_info(self):
+        print(f"{self._full_name}: {self.price} ({self.quantity} шт.)")
 
-    @name.setter
-    def name(self, value):
-        self._full_name = value
-        Item.all.remove(self)
-        Item.all.append(self)
-
-    def calculate_total_price(self):
-        return self.price * self.quantity
-
-    def apply_discount(self):
-        self.price *= self.pay_rate
-
-    def __repr__(self):
-        return f"Item('{self._full_name}', {self.price:.1f}, {self.quantity})"
-
-    def __str__(self):
-        return self._full_name
+    def change_price(self, multiplier: float):
+        self.price *= multiplier
 
     @classmethod
-    def instantiate_from_csv(cls, csv_file_path):
-        with open(csv_file_path, 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            items = [cls(row['name'], float(row['price']), int(row['quantity'])) for row in reader]
-        return items
+    def instantiate_from_csv(cls, csv_file_path='items.csv'):
+        if not os.path.exists(csv_file_path):
+            raise FileNotFoundError(f"Отсутствует файл {csv_file_path}")
 
-    @staticmethod
-    def get_class_string():
-        return "Item"
+        try:
+            with open(csv_file_path, 'r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                required_fields = ['name', 'price', 'quantity']
+                items = [cls(row['name'], float(row['price']), int(row['quantity'])) for row in reader]
+                return items
+        except (csv.Error, ValueError) as e:
+            raise InstantiateCSVError("Файл item.csv поврежден") from e
 
-    def save_all_to_csv(self, csv_file_path):
-        with open(csv_file_path, 'w', newline='', encoding='utf-8') as file:
-            fieldnames = ['name', 'price', 'quantity']
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-            writer.writeheader()
-            for item in Item.all:
-                writer.writerow({'name': item.name, 'price': item.price, 'quantity': item.quantity})
-
-    def __add__(self, other):
-        if isinstance(other, Item):
-            return self.quantity + other.quantity
-        else:
-            raise TypeError("Можно складывать только экземпляры класса Item")
-
-class Keyboard(Item, LanguageMixin):
-    def __init__(self, name, price, quantity):
-        super().__init__(name, price, quantity)
-
+if __name__ == '__main__':
+    try:
+        items = Item.instantiate_from_csv('data/items.csv')
+        for item in items:
+            item.display_info()
+    except FileNotFoundError as e:
+        print(f"Ошибка: {e}")
+    except InstantiateCSVError as e:
+        print(f"Ошибка: {e}")
