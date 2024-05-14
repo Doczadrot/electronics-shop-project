@@ -1,9 +1,12 @@
+# src/item.py
+import csv
 import os
-from src.language_mixin import LanguageMixin
+
 
 class InstantiateCSVError(Exception):
     """Исключение, возникающее при повреждении файла CSV."""
     pass
+
 
 class Item:
     pay_rate = 1.0
@@ -21,29 +24,20 @@ class Item:
     def display_info(self):
         print(f"{self._full_name}: {self.price} ({self.quantity} шт.)")
 
-    def change_price(self, multiplier: float):
-        self.price *= multiplier
-
     @classmethod
-    def instantiate_from_csv(cls, csv_file_path='items.csv'):
-        if not os.path.exists(csv_file_path):
-            raise FileNotFoundError(f"Отсутствует файл {csv_file_path}")
+    def instantiate_from_csv(cls, path='items.csv'):
+        cls.all = []
+        full_path = os.path.join(os.path.dirname(__file__), path)
+        if not os.path.exists(full_path):
+            raise FileNotFoundError('Отсутствует файл item.csv')
 
         try:
-            with open(csv_file_path, 'r', encoding='utf-8') as file:
+            with open(full_path, 'r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
-                required_fields = ['name', 'price', 'quantity']
-                items = [cls(row['name'], float(row['price']), int(row['quantity'])) for row in reader]
-                return items
-        except (csv.Error, ValueError) as e:
-            raise InstantiateCSVError("Файл item.csv поврежден") from e
-
-if __name__ == '__main__':
-    try:
-        items = Item.instantiate_from_csv('data/items.csv')
-        for item in items:
-            item.display_info()
-    except FileNotFoundError as e:
-        print(f"Ошибка: {e}")
-    except InstantiateCSVError as e:
-        print(f"Ошибка: {e}")
+                if reader:  # Проверяем, что файл не пустой
+                    for row in reader:
+                        # Проверяем, что ключ 'quantity' есть в словаре 'row'
+                        if 'quantity' in row:
+                            cls(row['name'], float(row['price']), int(row['quantity']))
+        except (KeyError, ValueError, TypeError) as e:  # Добавили TypeError
+            raise InstantiateCSVError('Файл item.csv поврежден') from e
